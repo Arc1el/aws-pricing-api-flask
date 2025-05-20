@@ -10,7 +10,6 @@ on:
         type: string
 
 env:
-  AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: aws-pricing-api-flask
 
 jobs:
