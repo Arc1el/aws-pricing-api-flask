@@ -504,7 +504,6 @@ class Index(Resource):
 
 
 if __name__ == '__main__':
-    # 환경 변수에서 포트 가져오기 (기본값: 8080)
     port = int(os.environ.get('PORT', 7777))
     
     # 디버그 모드로 서버 실행 (개발 환경에서만 사용)

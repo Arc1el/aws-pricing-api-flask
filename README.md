@@ -149,7 +149,7 @@ docker run -p 5000:5000 -e AWS_ACCESS_KEY_ID=your_access_key -e AWS_SECRET_ACCES
 - **설명**: 입력받은 AWS 리소스 정보를 기반으로 가격을 계산하여 반환합니다.
 - **요청 예시**:
 ```json
-{
+{ 
   "serviceCode": "AmazonEC2",
   "filters": [
     {
