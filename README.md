@@ -7,6 +7,7 @@
 5. [사용 예제](#사용-예제)
 6. [AWS 자격 증명 설정](#aws-자격-증명-설정)
 7. [문제 해결](#문제-해결)
+8. [기여하기](#기여하기)
 
 ## 시스템 요구사항
 - Python 3.11 이상
@@ -492,3 +493,23 @@ botocore.exceptions.ClientError: An error occurred (InvalidParameterException) w
 - 필터의 필드와 값이 유효한지 확인하세요.
 - `/api/services/{serviceCode}/attributes` 엔드포인트를 호출하여 유효한 속성 목록을 확인하세요.
 - `/api/services/{serviceCode}/attributes/{attributeName}/values` 엔드포인트를 호출하여 유효한 속성 값 목록을 확인하세요.
+
+## 기여하기
+
+이 프로젝트에 기여하고 싶으시다면 다음과 같은 방법으로 참여하실 수 있습니다.
+
+### 1. 이슈 등록
+- 버그 리포트
+- 새로운 기능 제안
+- 문서 개선 제안
+- 기타 질문이나 의견
+
+### 2. Pull Request 제출
+1. 이 저장소를 포크합니다.
+2. 새로운 브랜치를 생성합니다 (`git checkout -b feature/amazing-feature`).
+3. 변경사항을 커밋합니다 (`git commit -m 'Add some amazing feature'`).
+4. 브랜치에 푸시합니다 (`git push origin feature/amazing-feature`).
+5. Pull Request를 생성합니다.
+
+### 3. 라이선스
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
