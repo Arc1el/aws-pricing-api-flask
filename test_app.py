@@ -87,17 +87,36 @@ class TestAWSPricingAPIServer(unittest.TestCase):
         # 목 데이터 설정
         mock_price_info = {
             'serviceCode': 'AmazonEC2',
-            'resourceDetails': {
-                'instanceType': 't2.micro',
-                'location': 'US East (N. Virginia)',
-                'operatingSystem': 'Linux'
-            },
-            'pricing': {
-                'currency': 'USD',
-                'pricePerUnit': 0.0116,
-                'unit': 'Hrs'
-            },
-            'estimatedMonthlyCost': 8.47
+            'priceInfos': [
+                {
+                    'serviceCode': 'AmazonEC2',
+                    'resourceDetails': {
+                        'instanceType': 't2.micro',
+                        'location': 'US East (N. Virginia)',
+                        'operatingSystem': 'Linux'
+                    },
+                    'pricing': {
+                        'currency': 'USD',
+                        'pricePerUnit': 0.0116,
+                        'unit': 'Hrs'
+                    },
+                    'estimatedMonthlyCost': 8.47
+                },
+                {
+                    'serviceCode': 'AmazonEC2',
+                    'resourceDetails': {
+                        'instanceType': 't2.micro',
+                        'location': 'US East (N. Virginia)',
+                        'operatingSystem': 'Windows'
+                    },
+                    'pricing': {
+                        'currency': 'USD',
+                        'pricePerUnit': 0.0232,
+                        'unit': 'Hrs'
+                    },
+                    'estimatedMonthlyCost': 16.94
+                }
+            ]
         }
         mock_calculate_price.return_value = mock_price_info
 
@@ -114,11 +133,6 @@ class TestAWSPricingAPIServer(unittest.TestCase):
                     'type': 'TERM_MATCH',
                     'field': 'location',
                     'value': 'US East (N. Virginia)'
-                },
-                {
-                    'type': 'TERM_MATCH',
-                    'field': 'operatingSystem',
-                    'value': 'Linux'
                 }
             ]
         }
@@ -130,10 +144,12 @@ class TestAWSPricingAPIServer(unittest.TestCase):
         # 응답 검증
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['serviceCode'], 'AmazonEC2')
-        self.assertIn('resourceDetails', data)
-        self.assertIn('pricing', data)
-        self.assertEqual(data['pricing']['pricePerUnit'], 0.0116)
-        self.assertEqual(data['estimatedMonthlyCost'], 8.47)
+        self.assertIn('priceInfos', data)
+        self.assertEqual(len(data['priceInfos']), 2)
+        self.assertEqual(data['priceInfos'][0]['pricing']['pricePerUnit'], 0.0116)
+        self.assertEqual(data['priceInfos'][0]['estimatedMonthlyCost'], 8.47)
+        self.assertEqual(data['priceInfos'][1]['pricing']['pricePerUnit'], 0.0232)
+        self.assertEqual(data['priceInfos'][1]['estimatedMonthlyCost'], 16.94)
 
     @patch('app.pricing_calculator.calculate_total_cost')
     def test_calculate_cost(self, mock_calculate_total_cost):

@@ -74,9 +74,12 @@ pricing_info_model = api.model('PricingInfo', {
 
 pricing_response_model = api.model('PricingResponse', {
     'serviceCode': fields.String(description='서비스 코드 (예: AmazonEC2)'),
-    'resourceDetails': fields.Raw(description='리소스 상세 정보'),
-    'pricing': fields.Nested(pricing_info_model, description='가격 정보'),
-    'estimatedMonthlyCost': fields.Float(description='예상 월 비용')
+    'priceInfos': fields.List(fields.Nested(api.model('PriceInfo', {
+        'serviceCode': fields.String(description='서비스 코드 (예: AmazonEC2)'),
+        'resourceDetails': fields.Raw(description='리소스 상세 정보'),
+        'pricing': fields.Nested(pricing_info_model, description='가격 정보'),
+        'estimatedMonthlyCost': fields.Float(description='예상 월 비용')
+    })), description='가격 정보 목록')
 })
 
 resource_request_model = api.model('ResourceRequest', {

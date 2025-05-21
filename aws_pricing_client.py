@@ -288,6 +288,28 @@ class PricingCalculator:
         
         return resource_details
     
+    def _calculate_match_score(self, product: Dict[str, Any], filters: List[Dict[str, str]]) -> int:
+        """
+        제품이 필터와 얼마나 잘 일치하는지 점수를 계산합니다.
+        
+        Args:
+            product (Dict[str, Any]): 제품 정보
+            filters (List[Dict[str, str]]): 필터 목록
+        
+        Returns:
+            int: 일치 점수 (높을수록 더 정확한 일치)
+        """
+        score = 0
+        product_attributes = product.get('product', {}).get('attributes', {})
+        
+        for filter_item in filters:
+            field = filter_item.get('field', '')
+            value = filter_item.get('value', '')
+            if field and value and product_attributes.get(field) == value:
+                score += 1
+        
+        return score
+
     def calculate_price(self, service_code: str, filters: List[Dict[str, str]]) -> Dict[str, Any]:
         """
         특정 서비스의 특정 필터 조건에 맞는 제품의 가격을 계산합니다.
@@ -297,7 +319,7 @@ class PricingCalculator:
             filters (List[Dict[str, str]]): 필터 목록
         
         Returns:
-            Dict[str, Any]: 가격 정보
+            Dict[str, Any]: 가격 정보 목록 (상위 10개)
         
         Raises:
             ValueError: 가격 정보를 찾을 수 없는 경우
@@ -307,27 +329,47 @@ class PricingCalculator:
         if not products:
             raise ValueError(f"No products found for {service_code} with the given filters")
         
-        # 첫 번째 제품 사용
-        product = products[0]
+        # 각 제품에 대한 가격 정보와 일치 점수 계산
+        price_infos_with_scores = []
+        for product in products:
+            # 가격 정보 추출
+            pricing = self._extract_price_from_product(product)
+            if not pricing:
+                continue
+            
+            # 리소스 상세 정보 추출
+            resource_details = self._extract_resource_details(product, filters)
+            
+            # 월별 예상 비용 계산 (시간당 가격 * 730시간)
+            estimated_monthly_cost = 0
+            if pricing['unit'].lower() == 'hrs':
+                estimated_monthly_cost = pricing['pricePerUnit'] * 730  # 한 달 평균 시간
+            
+            # 일치 점수 계산
+            match_score = self._calculate_match_score(product, filters)
+            
+            price_infos_with_scores.append({
+                'serviceCode': service_code,
+                'resourceDetails': resource_details,
+                'pricing': pricing,
+                'estimatedMonthlyCost': estimated_monthly_cost,
+                'matchScore': match_score
+            })
         
-        # 가격 정보 추출
-        pricing = self._extract_price_from_product(product)
-        if not pricing:
+        if not price_infos_with_scores:
             raise ValueError(f"No pricing information found for {service_code} with the given filters")
         
-        # 리소스 상세 정보 추출
-        resource_details = self._extract_resource_details(product, filters)
+        # 일치 점수 기준으로 정렬하고 상위 10개 선택
+        sorted_price_infos = sorted(price_infos_with_scores, key=lambda x: x['matchScore'], reverse=True)
+        top_price_infos = sorted_price_infos[:10]
         
-        # 월별 예상 비용 계산 (시간당 가격 * 730시간)
-        estimated_monthly_cost = 0
-        if pricing['unit'].lower() == 'hrs':
-            estimated_monthly_cost = pricing['pricePerUnit'] * 730  # 한 달 평균 시간
+        # matchScore 필드 제거
+        for price_info in top_price_infos:
+            del price_info['matchScore']
         
         return {
             'serviceCode': service_code,
-            'resourceDetails': resource_details,
-            'pricing': pricing,
-            'estimatedMonthlyCost': estimated_monthly_cost
+            'priceInfos': top_price_infos
         }
     
     def calculate_total_cost(self, resources: List[Dict[str, Any]]) -> Dict[str, Any]:
