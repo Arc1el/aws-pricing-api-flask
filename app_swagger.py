@@ -186,6 +186,13 @@ class AttributeValues(Resource):
         """
         try:
             values = pricing_client.get_attribute_values(service_code, attribute_name)
+            if not values:
+                message = f'Invalid attribute name "{attribute_name}". Please check the correct attribute name.'
+                return {
+                    'serviceCode': service_code,
+                    'attributeName': attribute_name,
+                    'values': [message]
+                }
             return {
                 'serviceCode': service_code,
                 'attributeName': attribute_name,
